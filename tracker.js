@@ -1,8 +1,64 @@
+const bodyParser = require('body-parser');
+const express = require('express');
 const mongoose = require('mongoose');
 
+/* Connect to database. */
 mongoose.connect(
     process.env.MONGODB_URI || 'mongodb://localhost/exercise-track',
     {useNewUrlParser: true, useUnifiedTopology: true});
+    
+let router = express.Router();
+
+router.use(bodyParser.urlencoded({extended: false}))
+
+router.use(bodyParser.json())
+
+router.post('/new-user', function(req, res, next) {
+    next({
+        status : 500,
+        message : 'Not implemented (create user)'
+    });
+});
+
+router.get('/users', function(req, res, next) {
+    next({
+        status : 500,
+        message : 'Not implemented (get users)'
+    });
+});
+
+router.post('/add', function(req, res, next) {
+    next({
+        status : 500,
+        message : 'Not implemented (add exercise)'
+    });
+});
+
+router.get('/log', function(req, res, next) {
+    next({
+        status : 500,
+        message : 'Not implemented (user log)'
+    });
+});
+
+/* This is a stack of two middleware functions. */
+let apiErrorHandler = [
+    /* If a response has not been sent yet, set not found error. */
+    catchNotFound,
+    /* Error handling function: send a JSON (API) response with an error member
+     * that contains the error message. */
+    function(err, req, res, next) {
+        let {status, message} = getErrorStatusAndMessage(err);
+        res.status(status).json({
+            error : message
+        });
+    }];
+    
+module.exports.apiErrorHandler = apiErrorHandler;
+
+router.use(apiErrorHandler);
+
+module.exports.api = router;
 
 function sendIndex(req, res) {
     res.sendFile(__dirname + '/views/index.html')
@@ -57,19 +113,6 @@ function catchNotFound(req, res, next) {
 }
 
 module.exports.catchNotFound = catchNotFound;
-
-/* This is a stack of two middleware functions. */
-module.exports.apiErrorHandler = [
-    /* If a response has not been sent yet, set not found error. */
-    catchNotFound,
-    /* Error handling function: send a JSON (API) response with an error member
-     * that contains the error message. */
-    function(err, req, res, next) {
-        let {status, message} = getErrorStatusAndMessage(err);
-        res.status(status).json({
-            error : message
-        });
-    }];
 
 /* Stack of two middleware functions as apiErrorHandler above, but this one
  * sends an HTML error document instead of an API response. */

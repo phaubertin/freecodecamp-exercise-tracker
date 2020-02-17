@@ -2,7 +2,6 @@ const defaults = {
     PORT : 3000
 };
 
-const bodyParser = require('body-parser');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const express = require('express');
@@ -16,14 +15,11 @@ const app = express()
 
 app.use(cors())
 
-app.use(bodyParser.urlencoded({extended: false}))
-app.use(bodyParser.json())
-
 app.use(express.static('public'))
 
 app.get('/', tracker.sendIndex);
 
-app.use('/api', tracker.apiErrorHandler);
+app.use('/api/exercise', tracker.api);
 
 app.use(tracker.errorHandler);
 
