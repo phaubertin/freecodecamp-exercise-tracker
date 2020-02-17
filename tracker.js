@@ -1,3 +1,9 @@
+function sendIndex(req, res) {
+    res.sendFile(__dirname + '/views/index.html')
+}
+
+module.exports.sendIndex = sendIndex;
+
 /* Extract error HTTP status and message from error object. */
 function getErrorStatusAndMessage(err) {
     let errorStatusAndMessage = function(status, message) {
