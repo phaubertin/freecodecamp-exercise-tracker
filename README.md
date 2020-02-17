@@ -1,6 +1,8 @@
 # Exercise Tracker REST API
 
-#### A microservice project, part of Free Code Camp's curriculum
+### Work in progress.
+
+This is my solution to the freeCodeCamp Exercise Tracker REST API project. This repository was forked from the [freeCodeCamp/boilerplate-project-exercisetracker](https://github.com/freeCodeCamp/boilerplate-project-exercisetracker) repository on GitHub.
 
 ### User Stories
 
