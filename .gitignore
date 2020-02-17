@@ -1,0 +1,8 @@
+# Environment variables/local configuration
+.env
+
+# Installed Node modules. Modules to install are listed in package.json
+node_modules/
+
+# Local MongoDB database location in dev environment
+.mongodb/

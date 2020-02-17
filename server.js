@@ -1,10 +1,19 @@
-const express = require('express')
+const defaults = {
+    PORT : 3000
+};
+
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const express = require('express');
+const mongoose = require('mongoose');
+
+/* Load environment variable from .env file. */
+dotenv.config();
+
+/* Create Express application. */
 const app = express()
-const bodyParser = require('body-parser')
 
-const cors = require('cors')
-
-const mongoose = require('mongoose')
 mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track' )
 
 app.use(cors())
@@ -17,7 +26,6 @@ app.use(express.static('public'))
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
-
 
 // Not found middleware
 app.use((req, res, next) => {
@@ -43,6 +51,6 @@ app.use((err, req, res, next) => {
     .send(errMessage)
 })
 
-const listener = app.listen(process.env.PORT || 3000, () => {
+const listener = app.listen(process.env.PORT || defaults.PORT, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
