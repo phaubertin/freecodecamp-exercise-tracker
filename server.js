@@ -6,7 +6,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const express = require('express');
-const mongoose = require('mongoose');
 const tracker = require('./tracker');
 
 /* Load environment variable from .env file. */
@@ -14,8 +13,6 @@ dotenv.config();
 
 /* Create Express application. */
 const app = express()
-
-mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track' )
 
 app.use(cors())
 

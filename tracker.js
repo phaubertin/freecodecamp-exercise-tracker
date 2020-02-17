@@ -1,3 +1,9 @@
+const mongoose = require('mongoose');
+
+mongoose.connect(
+    process.env.MONGODB_URI || 'mongodb://localhost/exercise-track',
+    {useNewUrlParser: true, useUnifiedTopology: true});
+
 function sendIndex(req, res) {
     res.sendFile(__dirname + '/views/index.html')
 }
