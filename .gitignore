@@ -6,3 +6,6 @@ node_modules/
 
 # Local MongoDB database location in dev environment
 .mongodb/
+
+# npm debug log
+npm-debug.log
