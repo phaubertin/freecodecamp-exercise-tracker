@@ -2,7 +2,9 @@
 
 ### Work in progress.
 
-This is my solution to the freeCodeCamp Exercise Tracker REST API project. This repository was forked from the [freeCodeCamp/boilerplate-project-exercisetracker](https://github.com/freeCodeCamp/boilerplate-project-exercisetracker) repository on GitHub.
+This is my solution to the [freeCodeCamp](https://www.freecodecamp.org)
+[Exercise Tracker REST API project](https://www.freecodecamp.org/learn/apis-and-microservices/apis-and-microservices-projects/exercise-tracker).
+It was forked from the [freeCodeCamp/boilerplate-project-exercisetracker](https://github.com/freeCodeCamp/boilerplate-project-exercisetracker) repository on GitHub.
 
 ### User Stories
 
