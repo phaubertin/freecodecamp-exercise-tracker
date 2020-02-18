@@ -25,12 +25,16 @@ a {
     color: #000044;
 }
 
-.container {
+.container, .footer {
     max-width: 1048px;
     margin: 10px auto;
     background-color: #ccdde8;
     padding: 10px;
     border-radius: 10px;
+}
+
+.footer {
+    text-align: center;
 }
 
 form {
