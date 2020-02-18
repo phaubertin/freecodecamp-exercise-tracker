@@ -1,11 +1,16 @@
 const bodyParser = require('body-parser');
 const express = require('express');
-const mongoose = require('mongoose');
+const model = require('./model-mongoose');
 
-/* Connect to database. */
-mongoose.connect(
-    process.env.MONGODB_URI || 'mongodb://localhost/exercise-track',
-    {useNewUrlParser: true, useUnifiedTopology: true});
+const RE_USERNAME = /[a-z][a-z0-9_-]{0,64}/;
+
+class TrackerError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.name = "TrackerError";
+    this.status = status;
+  }
+}
     
 let router = express.Router();
 
@@ -13,32 +18,69 @@ router.use(bodyParser.urlencoded({extended: false}))
 
 router.use(bodyParser.json())
 
+function cleanUser(doc) {
+    return {
+        _id         : doc._id,
+        username    : doc.name
+    }
+}
+
 router.post('/new-user', function(req, res, next) {
-    next({
-        status : 500,
-        message : 'Not implemented (create user)'
-    });
+    let username = req.body.username;
+    
+    if(username === undefined) {
+        throw new TrackerError(400, 'No user name specified');
+    }
+    else if((typeof username != 'string') || ! username.match(RE_USERNAME)) {
+        throw new TrackerError(400, 'User name is invalid');
+    }
+    else {
+        /* User de-duplication: if a user with this name already exists, return the
+         * existing name instead of creating a new one.
+         * 
+         * Note that there is a race condition here: the lookup then create is not
+         * atomic, so the user might be created by another client between both
+         * operations. Because of this, we might still end up with two users with
+         * the same name. We will live with it for this project. */
+        model.getUserByName(username, function(err, doc) {
+            if(err) {
+                next(err);
+            }
+            else if(doc) {
+                res.json(cleanUser(doc));
+            }
+            else {
+                /* User does not exist. Let's create it. */
+                model.createUser(username, function(err, doc) {
+                    if(err) {
+                        next(err);
+                    }
+                    else {
+                        res.json(cleanUser(doc));
+                    }
+                });
+            }
+        });
+    }
 });
 
 router.get('/users', function(req, res, next) {
-    next({
-        status : 500,
-        message : 'Not implemented (get users)'
+    model.getAllUsers(function(err, doc) {
+        if(err) {
+            next(err);
+        }
+        else {
+            res.json(doc.map(cleanUser));
+        }
     });
 });
 
 router.post('/add', function(req, res, next) {
-    next({
-        status : 500,
-        message : 'Not implemented (add exercise)'
-    });
+    throw new TrackerError(500, 'Not implemented (add exercise)');
 });
 
 router.get('/log', function(req, res, next) {
-    next({
-        status : 500,
-        message : 'Not implemented (user log)'
-    });
+    throw new TrackerError(500, 'Not implemented (user log)');
 });
 
 /* This is a stack of two middleware functions. */
@@ -66,21 +108,14 @@ function sendIndex(req, res) {
 
 module.exports.sendIndex = sendIndex;
 
-/* Extract error HTTP status and message from error object. */
+/* Process error to decide on HTTP status and message. */
 function getErrorStatusAndMessage(err) {
-    let errorStatusAndMessage = function(status, message) {
-        return {
-            status : status,
-            message : message
-        }
-    }
-    
     if(err.errors) {
         /* This is a mongoose validation error.
          * 
          * Report the first validation error. */
         const keys = Object.keys(err.errors)
-        return errorStatusAndMessage(400, err.errors[keys[0]].message);
+        return new TrackerError(400, err.errors[keys[0]].message);
     }
     else {
         let status, message;
@@ -93,16 +128,16 @@ function getErrorStatusAndMessage(err) {
         }
         
         if(err.message) {
-            return errorStatusAndMessage(status, err.message);
+            return new TrackerError(status, err.message);
         }
         else {
             switch(status) {
             case 400:
-                return errorStatusAndMessage(status, 'Bad request');
+                return new TrackerError(status, 'Bad request');
             case 404:
-                return errorStatusAndMessage(status, 'Not found');
+                return new TrackerError(status, 'Not found');
             default:
-                return errorStatusAndMessage(status, 'Server error');
+                return new TrackerError(status, 'Server error');
             }
         }
     }
