@@ -1,5 +1,9 @@
+const dotenv = require('dotenv');
 const moment = require('moment');
 const mongoose = require('mongoose');
+
+/* Load environment variable from .env file. */
+dotenv.config();
 
 /* Connect to database. */
 mongoose.connect(
