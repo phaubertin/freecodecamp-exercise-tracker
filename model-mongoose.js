@@ -42,6 +42,12 @@ function getAllUsers(next) {
 
 module.exports.getAllUsers = getAllUsers;
 
+function getUserById(userId, next) {
+    userModel.findById(userId, next);
+}
+
+module.exports.getUserById = getUserById;
+
 function addLogItem(userId, description, duration, date, next) {
     let itemMembers = {
         userid      : mongoose.Types.ObjectId(userId),

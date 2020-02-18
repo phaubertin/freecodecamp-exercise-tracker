@@ -2,7 +2,11 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const model = require('./model-mongoose');
 
-const RE_USERNAME = /[a-z][a-z0-9_-]{0,64}/;
+const RE_USERNAME = /^[a-z][a-z0-9_-]{0,64}$/;
+
+const RE_DATE = /^[1-2][0-9]{3}-[0-9]{2}-[0-9]{2}$/;
+
+const RE_NONZERO_INTEGER = /^[1-9][0-9]{0,5}$/;
 
 class TrackerError extends Error {
   constructor(status, message) {
@@ -65,22 +69,165 @@ router.post('/new-user', function(req, res, next) {
 });
 
 router.get('/users', function(req, res, next) {
-    model.getAllUsers(function(err, doc) {
+    model.getAllUsers(function(err, docs) {
         if(err) {
             next(err);
         }
         else {
-            res.json(doc.map(cleanUser));
+            res.json(docs.map(cleanUser));
         }
     });
 });
 
+function cleanLogItem(doc, keepId) {
+    let item = {
+        description : doc.description,
+        duration : doc.duration
+    }
+    
+    if(doc.date) {
+        /* Keep only the first 4 space-separated fields of the date string. The
+         * rest is the time part of it. */
+        item.date = doc.date.toString().split(' ').slice(0, 4).join(' ');
+    }
+    
+    if(keepId) {
+        item._id = doc._id;
+    }
+    
+    return item;
+}
+
+function checkUserId(args) {
+    let userId = args.userId;
+    
+    if(! userId) {
+        /* A mixed case query argument is unusual and it is the only one in this
+         * API. Let's accept both cases for the I. */
+        userId = args.userid;
+        
+        if(! userId) {
+            throw new TrackerError(400, "Invalid 'userId' query argument");
+        }
+    }
+    
+    return userId;
+}
+
+function checkInteger(integerString, argName) {
+    let fail = function() {
+        throw new TrackerError(400, "Invalid '" + argName + "' argument");
+    }
+    
+    if(! integerString) {
+        /* Optional argument - this is not a failure. */
+        return undefined;
+    }
+    else if(typeof integerString !== 'string' || ! integerString.match(RE_NONZERO_INTEGER)) {
+        fail();
+    }
+    else {
+        let value = parseInt(integerString);
+        
+        if(isNaN(value)) {
+            fail();
+        }
+        else {
+            return value;
+        }
+    }
+}
+
+function checkDate(dateString, argName) {
+    let fail = function() {
+        throw new TrackerError(400, "Invalid '" + argname + "' argument");
+    }
+    
+    if(! dateString) {
+        /* Optional argument - this is not a failure. */
+        return undefined;
+    }
+    else if(typeof dateString !== 'string' || ! dateString.match(RE_DATE)) {
+        fail();
+    }
+    else {
+        let date = new Date(dateString);
+        
+        if(isNaN(date.getTime())) {
+            fail();
+        }
+        else {
+            return date;
+        }
+    }
+}
+
 router.post('/add', function(req, res, next) {
-    throw new TrackerError(500, 'Not implemented (add exercise)');
+    let userId      = checkUserId(req.body);
+    let duration    = checkInteger(req.body.duration, 'duration');
+    let description = req.body.description;
+    let date        = checkDate(req.body.date, 'date');
+    
+    /* Required arguments. */
+    if(! duration) {
+        throw new TrackerError(400, "Missing 'duration' argument");
+    }
+    
+    if(! description) {
+        throw new TrackerError(400, "Missing 'description' argument");
+    }
+    
+    model.getUserById(userId, function(err, doc) {
+        if(err) {
+            next(err);
+        }
+        else if(! doc) {
+            throw new TrackerError(400, "No such user ID");
+        }
+        else {
+            model.addLogItem(userId, description, duration, date, function(err, doc) {
+                if(err) {
+                    next(err)
+                }
+                else {
+                    res.json(cleanLogItem(doc, true));
+                }
+            });
+        }
+    });
 });
 
 router.get('/log', function(req, res, next) {
-    throw new TrackerError(500, 'Not implemented (user log)');
+    let userId  = checkUserId(req.query);
+    let from    = checkDate(req.query.from, 'from');
+    let to      = checkDate(req.query.to, 'to');
+    let limit   = checkInteger(req.query.limit, 'limit');
+    
+    model.getUserById(userId, function(err, doc) {
+        if(err) {
+            next(err);
+        }
+        else if(! doc) {
+            throw new TrackerError(400, "No such user ID");
+        }
+        else {
+            let retval = cleanUser(doc);
+            
+            model.getLogItems(userId, from, to, limit, function(err, docs) {
+                if(err) {
+                    next(err);
+                }
+                else {
+                    retval.count = docs.length;
+                    retval.log = docs.map(function(x) {
+                        return cleanLogItem(x, false);
+                    });
+                    
+                    res.json(retval);
+                }
+            });
+        }
+    });
 });
 
 /* This is a stack of two middleware functions. */

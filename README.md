@@ -1,10 +1,9 @@
 # Exercise Tracker REST API
 
-### Work in progress.
-
 This is my solution to the [freeCodeCamp](https://www.freecodecamp.org)
 [Exercise Tracker REST API project](https://www.freecodecamp.org/learn/apis-and-microservices/apis-and-microservices-projects/exercise-tracker).
-It was forked from the [freeCodeCamp/boilerplate-project-exercisetracker](https://github.com/freeCodeCamp/boilerplate-project-exercisetracker) repository on GitHub.
+I forked it from freeCodeCamp's [boilerplate-project-exercisetracker](https://github.com/freeCodeCamp/boilerplate-project-exercisetracker) repository on GitHub,
+and then implemented the required functionality.
 
 ### User Stories
 
