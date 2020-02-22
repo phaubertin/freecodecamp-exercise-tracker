@@ -6,7 +6,7 @@ which is part of the [freeCodeCamp](https://www.freecodecamp.org) "APIs and Micr
 [boilerplate-project-exercisetracker](https://github.com/freeCodeCamp/boilerplate-project-exercisetracker)
 repository on GitHub, and then implemented the required functionality.
 
-You can access a [Glitch](https://glitch.com/) live demo on here:
+You can access a [Glitch](https://glitch.com/) live demo here:
 [Exercise Tracker Live Demo](https://phaubertin-freecodecamp-exercise-tracker.glitch.me/)
 
 ### User Stories
